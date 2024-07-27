@@ -1,3 +1,4 @@
+import "./index.css"
 import { CustomCellRendererProps } from '@ag-grid-community/react';
 
 const CountryFlagRenderer = (params: CustomCellRendererProps) => (
