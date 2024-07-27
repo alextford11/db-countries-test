@@ -1,18 +1,21 @@
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, {useCallback, useMemo, useRef, useState} from "react";
 import CountryFlagRenderer from "../CountryFlagRenderer";
-import { AgGridReact } from "ag-grid-react";
-import { ColDef } from "ag-grid-community";
+import {AgGridReact} from "ag-grid-react";
+import {ColDef, NewValueParams} from "ag-grid-community";
 import CountriesSearchInput from "../CountriesSearchInput";
 
 interface ICountryRowData {
+    cca2: string;
     name: string;
     flag: string;
     population: number;
     languages: string;
     currencies: string;
+    favourite: boolean
 }
 
 interface ICountryAPIResponse {
+    cca2: string;
     name: { common: string };
     flags: { svg: string };
     population: number;
@@ -20,32 +23,68 @@ interface ICountryAPIResponse {
     currencies: Record<string, { name: string }>;
 }
 
+const getFavourites = (): string[] => {
+    return (localStorage.getItem("favourites") || "").split(',')
+}
+
+const setFavourites = (favourites: string[]) => {
+    localStorage.setItem("favourites", favourites.toString())
+}
+
+const inFavourites = (cca2: string): boolean => {
+    return getFavourites().includes(cca2)
+}
+
+const onFavouriteChanged = (newValue: NewValueParams) => {
+    const favourites = getFavourites()
+    const cca2 = newValue.data.cca2
+    if (newValue.data.favourite) {
+        if (!inFavourites(cca2)) {
+            favourites.push(cca2)
+            setFavourites(favourites)
+        }
+    } else {
+        if (inFavourites(cca2)) {
+            setFavourites(favourites.filter(favourite => favourite !== cca2))
+        }
+    }
+}
+
 const CountriesGrid: React.FC = () => {
     const gridRef = useRef<AgGridReact>(null);
-    const containerStyle = useMemo(() => ({ width: "100%", height: "500px" }), []);
-    const gridStyle = useMemo(() => ({ height: "100%", width: "100%" }), []);
+    const containerStyle = useMemo(() => ({width: "100%", height: "500px"}), []);
+    const gridStyle = useMemo(() => ({height: "100%", width: "100%"}), []);
     const [rowData, setRowData] = useState<ICountryRowData[]>([]);
     const [colDefs] = useState<ColDef[]>([
-        { headerName: "Country Name", field: "name", sort: "asc", initialSortIndex: 1 },
-        { field: "flag", cellRenderer: CountryFlagRenderer },
-        { field: "population" },
-        { field: "languages" },
-        { field: "currencies" },
+        {
+            headerName: "⭐",
+            field: "favourite",
+            cellEditor: "agCheckboxCellEditor",
+            editable: true,
+            onCellValueChanged: onFavouriteChanged
+        },
+        {headerName: "Country Name", field: "name", sort: "asc", initialSortIndex: 1},
+        {field: "flag", cellRenderer: CountryFlagRenderer},
+        {field: "population"},
+        {field: "languages"},
+        {field: "currencies"},
     ]);
     const defaultColDef: ColDef = useMemo(() => ({
         flex: 1,
     }), []);
 
     const onGridReady = useCallback(() => {
-        fetch("https://restcountries.com/v3.1/all?fields=name,flags,population,languages,currencies")
+        fetch("https://restcountries.com/v3.1/all?fields=name,flags,population,languages,currencies,cca2")
             .then((response) => response.json())
             .then((data: ICountryAPIResponse[]) => {
                 const countriesData: ICountryRowData[] = data.map((country) => ({
+                    cca2: country.cca2,
                     name: country.name.common,
                     flag: country.flags.svg,
                     population: country.population,
                     languages: Object.values(country.languages).join(", ") || "N/A",
                     currencies: Object.keys(country.currencies).join(", ") || "N/A",
+                    favourite: inFavourites(country.cca2)
                 }));
                 setRowData(countriesData);
             })
@@ -56,7 +95,7 @@ const CountriesGrid: React.FC = () => {
 
     return (
         <div style={containerStyle}>
-            <CountriesSearchInput gridRef={gridRef} />
+            <CountriesSearchInput gridRef={gridRef}/>
             <div style={gridStyle} className={"ag-theme-quartz-dark"}>
                 <AgGridReact
                     ref={gridRef}
