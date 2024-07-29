@@ -74,17 +74,19 @@ const CountriesGrid: React.FC = () => {
             cellEditor: "agCheckboxCellEditor",
             editable: true,
             onCellValueChanged: onFavouriteChanged,
+            filter: true
         },
         {
             headerName: "Country Name",
             field: "name",
             sort: "asc",
             initialSortIndex: 1,
+            filter: true,
         },
         {field: "flag", cellRenderer: CountryFlagRenderer},
-        {field: "population"},
-        {field: "languages"},
-        {field: "currencies"},
+        {field: "population", filter: true},
+        {field: "languages", filter: true},
+        {field: "currencies", filter: true},
         {cellRenderer: CountryDetailsDialog}
     ]);
     const defaultColDef: ColDef = useMemo(() => ({
@@ -95,7 +97,6 @@ const CountriesGrid: React.FC = () => {
         fetch("https://restcountries.com/v3.1/all?fields=name,flags,population,languages,currencies,cca2,capital,region,subregion,area,maps")
             .then((response) => response.json())
             .then((data: ICountryAPIResponse[]) => {
-                console.log(data)
                 const countriesData: ICountryRowData[] = data.map((country) => ({
                     cca2: country.cca2,
                     name: country.name.common,
