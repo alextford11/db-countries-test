@@ -64,7 +64,7 @@ const onFavouriteChanged = (newValue: NewValueParams) => {
 
 const CountriesGrid: React.FC = () => {
     const gridRef = useRef<AgGridReact>(null);
-    const containerStyle = useMemo(() => ({width: "100%", height: "500px"}), []);
+    const containerStyle = useMemo(() => ({width: "100%", height: "600px"}), []);
     const gridStyle = useMemo(() => ({height: "100%", width: "100%"}), []);
     const [rowData, setRowData] = useState<ICountryRowData[]>([]);
     const [colDefs] = useState<ColDef[]>([
@@ -128,6 +128,7 @@ const CountriesGrid: React.FC = () => {
                     columnDefs={colDefs}
                     defaultColDef={defaultColDef}
                     onGridReady={onGridReady}
+                    pagination={true}
                 />
             </div>
         </div>
