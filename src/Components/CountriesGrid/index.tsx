@@ -84,7 +84,7 @@ const CountriesGrid: React.FC = () => {
             filter: true,
         },
         {field: "flag", cellRenderer: CountryFlagRenderer},
-        {field: "population", filter: true},
+        {field: "population", filter: true, valueFormatter: (params) => params.value.toLocaleString()},
         {field: "languages", filter: true},
         {field: "currencies", filter: true},
         {cellRenderer: CountryDetailsDialog}

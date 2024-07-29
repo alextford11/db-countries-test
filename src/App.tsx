@@ -7,10 +7,10 @@ import CountriesGrid from "./Components/CountriesGrid";
 
 function App() {
     return (
-        <>
+        <div className="">
             <h1>Countries List</h1>
             <CountriesGrid/>
-        </>
+        </div>
     )
 }
 

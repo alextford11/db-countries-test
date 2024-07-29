@@ -53,8 +53,8 @@ const CountryDetailsDialog: React.FC<CustomCellRendererProps> = (props) => {
                                     <span><strong>Subregion:</strong> {props.data.subregion}</span>
                                     <span><strong>Languages:</strong> {props.data.languages}</span>
                                     <span><strong>Currencies:</strong> {props.data.currencies}</span>
-                                    <span><strong>Area:</strong> {props.data.area}km&#178;</span>
-                                    <span><strong>Population:</strong> {props.data.population}</span>
+                                    <span><strong>Area:</strong> {props.data.area.toLocaleString()}km&#178;</span>
+                                    <span><strong>Population:</strong> {props.data.population.toLocaleString()}</span>
                                     <span><strong>Google Maps:</strong> <a href={props.data.googleMaps}>View here</a></span>
                                 </div>
                             </div>
