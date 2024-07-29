@@ -3,24 +3,36 @@ import CountryFlagRenderer from "../CountryFlagRenderer";
 import {AgGridReact} from "ag-grid-react";
 import {ColDef, NewValueParams} from "ag-grid-community";
 import CountriesSearchInput from "../CountriesSearchInput";
+import CountryDetailsDialog from "../CountryDetailsDialog";
 
-interface ICountryRowData {
+export interface ICountryRowData {
     cca2: string;
     name: string;
     flag: string;
     population: number;
     languages: string;
     currencies: string;
-    favourite: boolean
+    favourite: boolean;
+    officialName: string;
+    capital: string;
+    region: string;
+    subregion: string;
+    area: number;
+    googleMaps: string;
 }
 
 interface ICountryAPIResponse {
     cca2: string;
-    name: { common: string };
+    name: { common: string, official: string };
     flags: { svg: string };
     population: number;
     languages: Record<string, string>;
     currencies: Record<string, { name: string }>;
+    capital: string[];
+    region: string;
+    subregion: string;
+    area: number;
+    maps: { googleMaps: string; };
 }
 
 const getFavourites = (): string[] => {
@@ -61,22 +73,29 @@ const CountriesGrid: React.FC = () => {
             field: "favourite",
             cellEditor: "agCheckboxCellEditor",
             editable: true,
-            onCellValueChanged: onFavouriteChanged
+            onCellValueChanged: onFavouriteChanged,
         },
-        {headerName: "Country Name", field: "name", sort: "asc", initialSortIndex: 1},
+        {
+            headerName: "Country Name",
+            field: "name",
+            sort: "asc",
+            initialSortIndex: 1,
+        },
         {field: "flag", cellRenderer: CountryFlagRenderer},
         {field: "population"},
         {field: "languages"},
         {field: "currencies"},
+        {cellRenderer: CountryDetailsDialog}
     ]);
     const defaultColDef: ColDef = useMemo(() => ({
         flex: 1,
     }), []);
 
     const onGridReady = useCallback(() => {
-        fetch("https://restcountries.com/v3.1/all?fields=name,flags,population,languages,currencies,cca2")
+        fetch("https://restcountries.com/v3.1/all?fields=name,flags,population,languages,currencies,cca2,capital,region,subregion,area,maps")
             .then((response) => response.json())
             .then((data: ICountryAPIResponse[]) => {
+                console.log(data)
                 const countriesData: ICountryRowData[] = data.map((country) => ({
                     cca2: country.cca2,
                     name: country.name.common,
@@ -84,7 +103,13 @@ const CountriesGrid: React.FC = () => {
                     population: country.population,
                     languages: Object.values(country.languages).join(", ") || "N/A",
                     currencies: Object.keys(country.currencies).join(", ") || "N/A",
-                    favourite: inFavourites(country.cca2)
+                    favourite: inFavourites(country.cca2),
+                    officialName: country.name.official,
+                    capital: country.capital.join(", ") || "N/A",
+                    region: country.region,
+                    subregion: country.subregion,
+                    area: country.area,
+                    googleMaps: country.maps.googleMaps
                 }));
                 setRowData(countriesData);
             })

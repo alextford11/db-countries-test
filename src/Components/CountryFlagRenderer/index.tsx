@@ -6,10 +6,10 @@ interface CountryFlagRendererProps extends ICellRendererParams {
     value: string;
 }
 
-const CountryFlagRenderer: React.FC<CountryFlagRendererProps> = ({value}) => {
+const CountryFlagRenderer: React.FC<CountryFlagRendererProps> = ({value, data}) => {
     return (
         <img
-            alt={`${value} Flag`}
+            alt={`${data.name} Flag`}
             src={value}
             className="country-flag"
         />
